@@ -1,3 +1,6 @@
+from fastapi import Request
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 
@@ -14,6 +17,11 @@ app = FastAPI(
     description="A tiny API for uploading and retrieving pictures."
 )
 
+templates = Jinja2Templates(directory="app/templates")
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/uploads", StaticFiles(directory="app/uploads"), name="uploads")
+
 ALLOWED_TYPES = {
     "image/jpeg",
     "image/png",
@@ -21,13 +29,13 @@ ALLOWED_TYPES = {
     "image/gif",
 }
 
-
 @app.get("/")
-def root():
-    return {
-        "message": "Picture Upload API",
-        "docs": "/docs",
-    }
+def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={},
+    )
 
 
 @app.post("/upload")
